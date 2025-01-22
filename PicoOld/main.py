@@ -7,7 +7,13 @@ import config
 import csv
 import temp_conv
 import coefficients
+import machine
+from machine import Pin
 
+PWR_AFE = Pin(config.PWR_AFE, Pin.OUT)
+PWR_AFE.value(1)
+
+led = Pin("LED", Pin.OUT)
 
 #Initiate the digital pins; Initiate the ADS1256 module.
 ADC = ADS1256.ADS1256()

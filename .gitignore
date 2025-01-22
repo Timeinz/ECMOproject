@@ -3,3 +3,6 @@ PicoW/.micropico
 PicoW/.vscode/extensions.json
 PicoW/.vscode/settings.json
 PicoW/webrepl_cfg.py
+PicoOld/.micropico
+PicoOld/.vscode/extensions.json
+PicoOld/.vscode/settings.json

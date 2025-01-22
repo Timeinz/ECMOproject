@@ -35,11 +35,26 @@ from machine import SPI, Pin, SoftI2C
 from lcd_api import LcdApi
 from i2c_lcd import I2cLcd
 
+# hardware PINs
+IND0 = 1
+IND1 = 2
+IND2 = 3
+I2C_SDA = 4
+I2C_SCL = 5
+Heater_PWR = 6
+meas_24V = 7
+meas_12V = 8
+meas_AFEBAT = 10
+PWR_AFE = 11
+ADC = 28
+SD_Detect = 22
+SD_CS = 21
+
 # ADC Pin definition
 RST_PIN        = 0  #it's not connected
 CS_PIN       = 17
 DRDY_PIN        = 20
-PDWN_PIN = 12
+PDWN_PIN = 0
 # LCD Definition
 I2C_ADDR = 0x27
 totalRows = 2
@@ -50,8 +65,8 @@ MISO_PIN = 16
 MOSI_PIN = 19
 SPI_HZ = 1920000
 # I2C Bus (LCD module)
-SCL_PIN = 27
-SDA_PIN = 26
+#SCL_PIN = 27
+#SDA_PIN = 26
 I2C_FREQ = 500000
 
 # SPI device, bus = 0, device = 0
