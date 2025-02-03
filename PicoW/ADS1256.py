@@ -88,7 +88,8 @@ class ADS1256:
             #config.lcd.putstr("ID Read failed")
             return -1
         
-        self.ADS1256_WaitDRDY()
+        if self.ADS1256_WaitDRDY() != 0:
+            return 1
         config.spi_writebyte([CMD['CMD_WREG'],
                               0x03,
                               0x02,
@@ -150,8 +151,9 @@ class ADS1256:
                 #config.lcd.move_to(0, 0)
                 #config.lcd.putstr("TO")
                 counter = 0
-                #break
+                return 1
             counter += 1
+        return 0
         '''
         #config.lcd.clear()
         ''
@@ -164,7 +166,8 @@ class ADS1256:
         '''
             
     def ADS1256_ReadChipID(self):
-        self.ADS1256_WaitDRDY()
+        if self.ADS1256_WaitDRDY() != 0:
+            return -1
         
         ID = self.ADS1256_Read_data(REG_E['REG_STATUS'])
         
