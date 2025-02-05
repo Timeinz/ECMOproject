@@ -4,11 +4,13 @@ task_queue = []
 
 def enqueue(task):
     # Inserting into the queue while maintaining priority order
-    task.last_run_time = time.ticks_ms()  # Update last run time for starvation check
+    now = time.ticks_ms()
+    task.last_run_time = now  # Update last run time for starvation check
     for i, t in enumerate(task_queue):
+        if now - t.last_run_time > 3000: # increase priority if task is older than 3 seconds
+            t.priority -= 1
         if task.priority < t.priority:  # Higher priority means lower number
             task_queue.insert(i, task)
-            return
     task_queue.append(task)
 
 def dequeue():

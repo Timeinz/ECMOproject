@@ -22,8 +22,7 @@ class Peripherals:
             self.PWR_AFE = Pin(config.PWR_AFE, Pin.OUT)
             self.AFE_state = False
             self.DRDY = Pin(config.DRDY_PIN, Pin.IN, Pin.PULL_DOWN)
-            self.DRDY_flag = False
-            self.ADC = self._init_ADC()
+            self.ADC = ADS1256.ADS1256()
 
     def led_on(self):
         self.led.on()
@@ -38,19 +37,17 @@ class Peripherals:
         self._write_callback = callback
     
     def DRDY_callback(self):
-        self.DRDY_flag = True
+        self.ADC.flag = True
     
     def _init_ADC(self):
         try:
             #Initiate the digital pins; Initiate the ADS1256 module.
-            ADC = ADS1256.ADS1256()
-            flag = False
             if (config.module_init() != 0):
                 break # I know it's SyntaxError here but this will do the trick and trigger the except.
-            if (ADC.ADS1256_init() != 0): 
+            if (self.ADC.ADS1256_init() != 0): 
                 break
             print("Successfully connected to ADC")
-            return ADC
+            return 0
         except Exception as e:
             pass
         print("Failed to connect to ADC")

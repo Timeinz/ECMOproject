@@ -1,11 +1,14 @@
 import network
 from time import sleep
 import credentials
+from printhandler import PrintHandler
 
 # Initialize WLAN in station mode
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 
+ph = PrintHandler()
+ph.set_enable(True)
 
 attempts = 10
 while attempts > 0:
@@ -37,4 +40,4 @@ while attempts > 0:
 
 import webrepl
 #import webrepl_setup
-webrepl.start() 
+webrepl.start()

@@ -1,7 +1,7 @@
 import config
 import RPi.GPIO as GPIO
-from machine import Pin
 import time
+import coefficients
 
 ScanMode = 0
 
@@ -69,10 +69,25 @@ class ADS1256:
     def __init__(self):
         self.rst_pin = config.RST_PIN
         self.cs_pin = config.CS_PIN
-        self.drdy_pin = config.DRDY_PIN
-        self.interrupt = Pin(self.drdy_pin)
-        self.flag = 0
-        self.interrupt.irq(trigger=Pin.IRQ_FALLING, handler=self.callback)
+        #self.drdy_pin = config.DRDY_PIN
+        #self.interrupt = Pin(self.drdy_pin)
+        self.flag = False
+        self.next_chan = 1
+        self.num_of_chans = 8
+        self.raw = []
+        self.read = []
+        self.read_flag = False
+        self.chan = []
+        #self.interrupt.irq(trigger=Pin.IRQ_FALLING, handler=self.callback)
+
+    class channel_cal:
+        def __init__(self, c0, c1):
+            self.c0 = c0
+            self.c1 = c1
+        
+        def convert(self, x):
+            temp = self.c0 * x + self.c1
+            return temp
 
     def callback(self, interrupt):
         self.flag = 0
@@ -88,6 +103,10 @@ class ADS1256:
             #config.lcd.putstr("ID Read failed")
             return -1
         
+        #setup calibration coefficients for each ADC channel
+        for i in range(0, self.num_of_chans):
+            self.chan.append(self.channel_cal(coefficients.channel[i][0], coefficients.channel[i][1]))
+
         if self.ADS1256_WaitDRDY() != 0:
             return 1
         config.spi_writebyte([CMD['CMD_WREG'],
@@ -106,22 +125,22 @@ class ADS1256:
         return 0
 
     def ADS1256_cycle_read(self):
-        next_chan = 1
-        num_of_chans = 8
-        read = []
-        while(next_chan <= num_of_chans):
-            self.ADS1256_WaitDRDY()
-            if (next_chan == num_of_chans):
-                self.ADS1256_SetChannel(8, 0)
-            else:
-                self.ADS1256_SetChannel(8, next_chan)
-            config.spi_writebyte([CMD['CMD_SYNC'],
-                                  CMD['CMD_WAKEUP'],
-                                  CMD['CMD_RDATA']
-                                  ])
-            read.append(self.ADS1256_Read_ADC_Data())
-            next_chan += 1
-        return read
+        if self.next_chan == 1:
+            self.raw = []
+            self.read_flag = False
+        if (self.next_chan == self.num_of_chans):
+            self.ADS1256_SetChannel(8, 0)
+            self.next_chan = 1
+            self.read_flag = True
+        else:
+            self.ADS1256_SetChannel(8, self.next_chan)
+        config.spi_writebyte([CMD['CMD_SYNC'],
+                                CMD['CMD_WAKEUP'],
+                                CMD['CMD_RDATA']
+                                ])
+        self.raw.append(self.ADS1256_Read_ADC_Data())
+        self.next_chan += 1
+        return 0
 
     # Hardware reset
     def ADS1256_reset(self):
@@ -141,10 +160,10 @@ class ADS1256:
             #time.sleep_us(10)
         return
         '''
-        self.flag = 1
+        #self.flag = 1
         counter = 0
         timeout = 200000
-        while(self.flag):
+        while(not self.flag):
             if (counter > timeout):
                 #self.interrupt.irq(trigger=Pin.IRQ_FALLING, handler=None)
                 print("Time Out ...\n")
@@ -260,7 +279,7 @@ class ADS1256:
         if(ScanMode == 0):# 0  Single-ended input  8 channel1 Differential input  4 channe 
             if(PChannel>8 or NChannel>8):
                 return 0
-            self.ADS1256_SetChannal(PChannel, NChannel)
+            self.ADS1256_SetChannel(PChannel, NChannel)
             self.ADS1256_WriteCmd(CMD['CMD_SYNC'])
             # config.delay_ms(10)
             self.ADS1256_WriteCmd(CMD['CMD_WAKEUP'])
