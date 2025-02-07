@@ -32,8 +32,6 @@
 import RPi.GPIO as GPIO
 import time
 from machine import SPI, Pin, SoftI2C
-from lcd_api import LcdApi
-from i2c_lcd import I2cLcd
 
 # hardware PINs
 IND0 = 1

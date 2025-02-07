@@ -1,12 +1,10 @@
 import coefficients
-import temp_conv
 import time
 import tasks
 from peripherals import Peripherals
 from printhandler import PrintHandler
 import queue as q
 import machine
-from machine import Timer, Pin
 
 p = Peripherals()
 ph = PrintHandler()
@@ -20,9 +18,6 @@ class Task:
         self.args = args
         self.kwargs = kwargs
         self.last_run_time = 0  # For starvation prevention
-
-# initializing the task queue
-task_queue = []
 
 # Bluetooth callback function to handle the commands
 def on_rx(data):
@@ -60,11 +55,6 @@ new_tasks = []
 # set up the bluetooth receive message callback.
 p.BLEs.on_write(on_rx)  # Set the callback function for data reception
 
-#setup calibration coefficients for each ADC channel
-chan = []
-for i in range(0, 8):
-    chan.append(temp_conv.channel_cal(coefficients.channel[i][0], coefficients.channel[i][1]))
-
 # Start an infinite loop
 while True:
     if p.ADC.flag:
@@ -93,5 +83,5 @@ while True:
         ph.print("timeout")
 
     # Idle if there's nothing to do
-    if not new_tasks and not task_queue and not p.ADC.flag:
+    if not new_tasks and not q.task_queue and not p.ADC.flag:
         machine.idle()
