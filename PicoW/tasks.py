@@ -1,4 +1,4 @@
-from machine import Pin
+from machine import Pin, Timer
 from peripherals import Peripherals
 from printhandler import PrintHandler
 import time
@@ -30,3 +30,17 @@ def read_adc_callback():
         for i in range(0, 8):              #convert ADC reading to temp using calibrattion coefficients
             read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
         ph.print(p.ADC.raw)
+
+def toggleph():
+    ph.set_enable(not ph.is_enabled())
+
+def slowtask():
+    time.sleep_ms(3000)
+
+def indon():
+    p.timer.init(period=100, mode=Timer.PERIODIC, callback=p.blink_callback)
+
+def indoff():
+    p.timer.deinit()
+    for led in p.leds:
+        led.off()

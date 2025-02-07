@@ -2,16 +2,24 @@ import time
 
 task_queue = []
 
-def enqueue(task):
-    # Inserting into the queue while maintaining priority order
+def manage_queue(tasks):
+    """
+    Adjust priority of existing tasks for starvation, add new tasks, and sort by priority.
+    """
     now = time.ticks_ms()
-    task.last_run_time = now  # Update last run time for starvation check
-    for i, t in enumerate(task_queue):
-        if now - t.last_run_time > 3000: # increase priority if task is older than 3 seconds
-            t.priority -= 1
-        if task.priority < t.priority:  # Higher priority means lower number
-            task_queue.insert(i, task)
-    task_queue.append(task)
+    
+    # Check starvation for existing tasks in the queue
+    for task in task_queue:
+        if now - task.last_run_time > 3000:  # Increase priority if task is older than 3 seconds
+            task.priority -= 1
+    
+    # Add new tasks to the queue
+    for task in tasks:
+        task.last_run_time = now  # Set initial last run time for new tasks
+    task_queue.extend(tasks)
+    
+    # Sort all tasks by priority (lower number means higher priority)
+    task_queue.sort(key=lambda x: x.priority)
 
 def dequeue():
     if task_queue:
