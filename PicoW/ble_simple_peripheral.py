@@ -1,5 +1,3 @@
-# This example demonstrates a UART periperhal.
-
 import bluetooth
 import random
 import struct
@@ -61,9 +59,9 @@ class BLESimplePeripheral:
             if value_handle == self._handle_rx and self._write_callback:
                 self._write_callback(value)
 
-    def send(self, data):
+    def send(self, *args, **kwargs):
         for conn_handle in self._connections:
-            self._ble.gatts_notify(conn_handle, self._handle_tx, data)
+            self._ble.gatts_notify(conn_handle, self._handle_tx, *args, **kwargs)
 
     def is_connected(self):
         return len(self._connections) > 0

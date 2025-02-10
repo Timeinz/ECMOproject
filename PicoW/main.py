@@ -1,23 +1,16 @@
-import coefficients
 import time
 import tasks
+from tasks import Task
 from peripherals import Peripherals
-from printhandler import PrintHandler
+from printhandler import PrintHandler as ph
+from bluetooth_handler import Bluetooth
 import queue as q
 import machine
+import gc
 
 p = Peripherals()
-ph = PrintHandler()
+bt = Bluetooth()
 
-
-# Defining the task class which will be used to queue them
-class Task:
-    def __init__(self, func, priority, *args, **kwargs):
-        self.func = func
-        self.priority = priority
-        self.args = args
-        self.kwargs = kwargs
-        self.last_run_time = 0  # For starvation prevention
 
 # Bluetooth callback function to handle the commands
 def on_rx(data):
@@ -53,35 +46,45 @@ def on_rx(data):
 new_tasks = []
 
 # set up the bluetooth receive message callback.
-p.BLEs.on_write(on_rx)  # Set the callback function for data reception
+bt.BLEs.on_write(on_rx)  # Set the callback function for data reception
+
+# Define the timer interrupt callback function
+def gc_collect_callback(timer):
+    pass
+    #ph.print(gc.mem_free()) # print available memory
+    #gc.collect()  # Call garbage collection
+
+# Set up the timer for an interrupt every second
+timer = machine.Timer(-1)  # -1 means use the next available hardware timer
+timer.init(period=1000, mode=machine.Timer.PERIODIC, callback=gc_collect_callback)
 
 # Start an infinite loop
 while True:
     if p.ADC.flag:
         p.ADC.flag = False
         new_tasks.append(Task(tasks.read_adc_callback, priority=1))
-       
     now = time.ticks_ms()
 
     try:
         # Create new_tasks list here, so it captures all tasks from interrupts
         current_tasks = new_tasks[:]  # Copy the current tasks to process
         new_tasks.clear()  # Clear the global list for the next cycle
-
         if current_tasks:  # Only manage if there are new tasks
             q.manage_queue(current_tasks)
-        
         task = q.dequeue()
         if task is not None:
-            ph.print(task.func.__name__)
+            #ph.print(task.func.__name__)
             task.func(*task.args, **task.kwargs)  # Execute task with any provided arguments
 
     except Exception as e:
         ph.print(e)
     
     if time.ticks_ms() - now > 1000:  # notification to debug slow tasks
-        ph.print("timeout")
-
+        ph.print("overtime")
+    
     # Idle if there's nothing to do
-    if not new_tasks and not q.task_queue and not p.ADC.flag:
-        machine.idle()
+    #if not new_tasks and not q.task_queue: #and not p.ADC.flag:
+        #machine.idle()
+    #machine.idle() doesn't seem to be working ...
+    #gc.collect()
+    time.sleep_ms(1)

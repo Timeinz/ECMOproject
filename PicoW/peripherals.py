@@ -1,6 +1,4 @@
 from machine import Pin, Timer
-import bluetooth
-from ble_simple_peripheral import BLESimplePeripheral
 import config
 import ADS1256
 from printhandler import PrintHandler as ph
@@ -17,34 +15,23 @@ class Peripherals:
     def __init__(self):
         # Check if initialization has already been done to prevent reinitialization
         if not hasattr(self, 'led'):
-            self.led = Pin("LED", Pin.OUT)
-            self.led_state = False
-            self.BLEs = BLESimplePeripheral(bluetooth.BLE())
-            self.PWR_AFE = Pin(config.PWR_AFE, Pin.OUT)
-            self.AFE_state = False
-            self.DRDY = Pin(config.DRDY_PIN, Pin.IN, Pin.PULL_DOWN)
-            self.ADC = ADS1256.ADS1256()
-            self.IND0 = Pin(config.IND0, Pin.OUT)
-            self.IND1 = Pin(config.IND1, Pin.OUT)
-            self.IND2 = Pin(config.IND2, Pin.OUT)
-            self.leds = [self.led, self.IND0, self.IND1, self.IND2] # Define the LED pins. The Pico has four on-board LEDs on GPIO pins 25, 22, 21, and 20.
+            self.led        = Pin("LED", Pin.OUT)
+            self.led_state  = False
+            self.PWR_AFE    = Pin(config.PWR_AFE, Pin.OUT)
+            self.AFE_state  = False
+            self.ADC        = ADS1256.ADS1256()
+            self.IND0       = Pin(config.IND0, Pin.OUT)
+            self.IND1       = Pin(config.IND1, Pin.OUT)
+            self.IND2       = Pin(config.IND2, Pin.OUT)
+            self.leds       = [self.led, self.IND0, self.IND1, self.IND2] # Define the LED pins. The Pico has four on-board LEDs on GPIO pins 25, 22, 21, and 20.
             self.current_led = 0 # Keep track of which LED we're currently lighting up
-            self.timer = Timer() # Setup the timer
+            self.timer      = Timer() # Setup the timer
 
     def led_on(self):
         self.led.on()
 
     def led_off(self):
         self.led.off()
-
-    def send_bt_message(self, message):
-        self.BLEs.send(message)
-
-    def on_write(self, callback):
-        self._write_callback = callback
-    
-    def DRDY_callback(self):
-        self.ADC.flag = True
     
     def _init_ADC(self):
         try:
