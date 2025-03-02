@@ -1,25 +1,25 @@
-from bluetooth_handler import Bluetooth
+from communication import Communication
 
-bt = Bluetooth()
+bt = Communication.get_ble()
 
 class PrintHandler:
-    _enabled = False  # Class variable to control if printing is active
+    _repl_enabled = False  # Class variable to control if printing is active
     _bt_enabled = False
 
     @classmethod
-    def set_console_enable(cls, state):
+    def repl_set_enable(cls, state):
         """Enable or disable all console print operations."""
-        cls._enabled = state
+        cls._repl_enabled = state
 
     @classmethod
-    def set_bt_enable(cls, state):
+    def bt_set_enable(cls, state):
         """Enable or disable all bluetooth print operations."""
         cls._bt_enabled = state
 
     @classmethod
-    def is_enabled(cls):
+    def repl_is_enabled(cls):
         """Check if printing is currently enabled."""
-        return cls._enabled
+        return cls._repl_enabled
 
     @classmethod
     def bt_is_enabled(cls):
@@ -29,7 +29,7 @@ class PrintHandler:
     @classmethod
     def print(cls, *args, **kwargs):
         """Print if enabled, otherwise do nothing."""
-        if cls._enabled:
+        if cls._repl_enabled:
             print(*args, **kwargs)
         if cls._bt_enabled:
             # Convert args to string
@@ -42,4 +42,4 @@ class PrintHandler:
                 message = f"{args_str}: {kwargs_str}"
             else:
                 message = args_str + '\n'
-            bt.send_bt_message(message.encode('utf-8'))
+            bt.send(message.encode('utf-8'))

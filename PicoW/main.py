@@ -3,13 +3,13 @@ import tasks
 from tasks import Task
 from peripherals import Peripherals
 from printhandler import PrintHandler as ph
-from bluetooth_handler import Bluetooth
+from communication import Communication
 import queue as q
 import machine
 import gc
 
 p = Peripherals()
-bt = Bluetooth()
+bt = Communication.get_ble()
 
 
 # Bluetooth callback function to handle the commands
@@ -46,7 +46,7 @@ def on_rx(data):
 new_tasks = []
 
 # set up the bluetooth receive message callback.
-bt.BLEs.on_write(on_rx)  # Set the callback function for data reception
+bt.on_write(on_rx)  # Set the callback function for data reception
 
 # Define the timer interrupt callback function
 def gc_collect_callback(timer):

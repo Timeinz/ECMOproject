@@ -7,8 +7,8 @@ from printhandler import PrintHandler as ph
 #wlan = network.WLAN(network.STA_IF)
 #wlan.active(True)
 
-ph.set_console_enable(True)
-ph.set_bt_enable(True)
+ph.repl_set_enable(True)
+ph.bt_set_enable(True)
 
 '''
 attempts = 10

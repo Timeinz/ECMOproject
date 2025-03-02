@@ -16,13 +16,12 @@ class Task:
         self.last_run_time = 0  # For starvation prevention
 
 def toggleafe():
-    p.PWR_AFE.value(not p.AFE_state)  # Toggle the AFE state (on/off)
-    p.AFE_state = not p.AFE_state  # Update the AFE state
-    ph.print("AFE:"+str(p.AFE_state))
+    AFE_state = p.PWR_AFE.value()
+    p.PWR_AFE.value(not AFE_state)  # Toggle the AFE state (on/off)
+    ph.print("AFE:"+str(AFE_state))
 
 def toggle():
-    p.led.value(not p.led_state)  # Toggle the LED state (on/off)
-    p.led_state = not p.led_state  # Update the LED state
+    p.led.value(not p.led.value())  # Toggle the LED state (on/off)
 
 def mainstart():
     # set the DRDY interrupt
@@ -45,11 +44,11 @@ def read_adc_callback():
         #ph.print(read)
         ph.print(p.ADC.raw)
 
-def toggleph():
-    ph.set_console_enable(not ph.is_enabled())
+def togglephrepl():
+    ph.repl_set_enable(not ph.repl_is_enabled())
 
-def togglebtph():
-    ph.set_bt_enable(not ph.bt_is_enabled())
+def togglephbt():
+    ph.bt_set_enable(not ph.bt_is_enabled())
 
 def slowtask():
     time.sleep_ms(3000)
