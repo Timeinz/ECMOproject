@@ -1,7 +1,11 @@
-import network
+import network, os
 from time import sleep
 import credentials
-from printhandler import PrintHandler as ph
+from printhandler import PrintHandler
+from peripherals import Peripherals
+
+ph  = PrintHandler()
+p   = Peripherals()
 
 # Initialize WLAN in station mode
 #wlan = network.WLAN(network.STA_IF)
@@ -9,6 +13,22 @@ from printhandler import PrintHandler as ph
 
 ph.repl_set_enable(True)
 ph.bt_set_enable(True)
+
+# Mount the SD card at /sd
+try:
+    os.mount(p.SD, '/sd')
+    ph.print("SD card mounted successfully!")
+    ph.print(os.listdir('/sd'))  # List files on SD card
+except Exception as e:
+    ph.print("Error mounting SD card:", e)
+
+try:
+    is_live = p.RTC.initialize()
+    ph.print("RTC connected successfully!")
+    ph.print("RTC live status: " + str(is_live))
+except Exception as e:
+    ph.print("Error connecting to RTC:", e)
+
 
 '''
 attempts = 10

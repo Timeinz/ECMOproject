@@ -54,15 +54,30 @@ def slowtask():
     time.sleep_ms(3000)
 
 def indon():
-    p.timer.init(period=100, mode=Timer.PERIODIC, callback=p.blink_callback)
+    p.timer.init(period=100, mode=Timer.PERIODIC, callback=blink_callback)
 
 def indoff():
     p.timer.deinit()
     for led in p.leds:
         led.off()
+    
+def blink_callback(timer):                          # Timer callback function
+    for i in range(len(p.leds)):
+        if p.leds[i].value() == True:               # Find current LED
+            p.leds[i].value(False)                  # Turn off LED first
+            p.leds[(i+1)%len(p.leds)].value(True)   # Turn on next LED, wrapping around if necessary
+            return 0
 
 def initadc():
-    p._init_ADC()
+    try:
+        if (p.ADC.ADS1256_init() != 0): 
+            raise Exception()
+        ph.print("Successfully connected to ADC")
+        return 0
+    except Exception as e:
+        pass
+    ph.print("Failed to connect to ADC")
+    return None
 
 def reboot():
     reset()

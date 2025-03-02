@@ -3,7 +3,7 @@ import config
 import bluetooth
 from ble_simple_peripheral import BLESimplePeripheral
 
-SPI_BAUDRATE    = 1920000
+SPI_BAUDRATE    = 1920000 # SPI speed capped at 1.92MHz due to ADS1256 limitation (fclk/4)
 SPI_CONTROLLER  = 0
 I2C_FREQ        = 400000
 I2C_CONTROLLER  = 0

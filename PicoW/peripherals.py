@@ -1,5 +1,5 @@
-from machine import Pin, Timer
-import sdcard, os
+from machine import Pin
+import sdcard
 import config
 from ads1256 import ADS1256
 from ds3231 import DS3231
@@ -30,23 +30,7 @@ class Peripherals:
             self.PWR_AFE        = Pin(config.PWR_AFE, Pin.OUT)
             self.ADC            = ADS1256(spi)
             self.SD             = sdcard.SDCard(spi, config.SD_CS)
-            self.RTC            = DS3231(i2c)
-            self.timer          = Timer() # Setup the timer 
-    
-    def _init_ADC(self):
-        try:
-            if (self.ADC.ADS1256_init() != 0): 
-                raise Exception()
-            ph.print("Successfully connected to ADC")
-            return 0
-        except Exception as e:
-            pass
-        ph.print("Failed to connect to ADC")
-        return None  # If all retries fail, return None or handle as needed
-    
-    def blink_callback(self, timer):                            # Timer callback function
-        for i in range(len(self.leds)):
-            if self.leds[i].value() == True:                    # Find current LED
-                self.leds[i].value(False)                       # Turn off LED first
-                self.leds[(i+1)%len(self.leds)].value(True)     # Turn on next LED, wrapping around if necessary
-                return 0
+            self.RTC            = DS3231(i2c, indicator=self.IND2)
+
+# Idea here to have a peripheral initiator, that deals with more copmlex setting ups of the peripherals, and tracks there status,
+# all centrally in one spot, and can then be called from boot.py.
