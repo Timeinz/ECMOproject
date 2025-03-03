@@ -1,10 +1,15 @@
 from machine import Pin, Timer, reset
 from peripherals import Peripherals
-from printhandler import PrintHandler as ph
+from printhandler import PrintHandler
+from datawriter import DataWriter
+import datetime_conversion as dtc
 import time
 import gc
 
 p = Peripherals()
+ph = PrintHandler()
+dw = DataWriter()
+timer = Timer()
 
 # Defining the task class which will be used to queue them
 class Task:
@@ -33,16 +38,14 @@ def mainstop():
     p.IND0.off()
 
 def read_adc_callback():
-    p.ADC.ADS1256_cycle_read()     #fetch raw data from ADC
+    p.ADC.ADS1256_cycle_read()     # fetch raw data from ADC
     
     if p.ADC.read_flag:
-        #read = [time.ticks_ms()]           #initate read. (also take the time in ms)
-        #for i in range(0, p.ADC.num_of_chans):              #convert ADC reading to temp using calibrattion coefficients
-            #read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
-            #ph.print(p.ADC.raw)
-            #read.append(p.ADC.raw[i])
-        #ph.print(read)
-        ph.print(p.ADC.raw)
+        read = [dtc.to_human_int(p.RTC.read_datetime())]        # initate read. also take the time in ms, convert to human-readable int.
+        for i in range(0, p.ADC.num_of_chans):                  # convert ADC reading to temp using calibrattion coefficients
+            read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
+        dw.write_data(read)
+        ph.print(read)
 
 def togglephrepl():
     ph.repl_set_enable(not ph.repl_is_enabled())
@@ -54,10 +57,10 @@ def slowtask():
     time.sleep_ms(3000)
 
 def indon():
-    p.timer.init(period=100, mode=Timer.PERIODIC, callback=blink_callback)
+    timer.init(period=100, mode=Timer.PERIODIC, callback=blink_callback)
 
 def indoff():
-    p.timer.deinit()
+    timer.deinit()
     for led in p.leds:
         led.off()
     
@@ -70,7 +73,7 @@ def blink_callback(timer):                          # Timer callback function
 
 def initadc():
     try:
-        if (p.ADC.ADS1256_init() != 0): 
+        if (p.ADC.ADS1256_init(ph) != 0):
             raise Exception()
         ph.print("Successfully connected to ADC")
         return 0

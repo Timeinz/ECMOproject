@@ -1,9 +1,10 @@
 import config
 import time
 import coefficients
-from machine import Pin, Timer
-from printhandler import PrintHandler as ph
+from machine import Pin
+from printhandler import PrintHandler
 
+ph = PrintHandler()
 ScanMode = 0
 
 # gain channel
@@ -93,8 +94,7 @@ class ADS1256:
     def DRDY_callback(self, DRDY_irq):
         self.flag = True
 
-    def ADS1256_init(self):
-        self.CS.value(0)
+    def ADS1256_init(self, ph):
         self.PDWN.value(1)
         ID = self.ADS1256_ReadChipID()
         ph.print(ID)

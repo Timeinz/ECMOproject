@@ -22,6 +22,7 @@ class Peripherals:
     def __init__(self):
         # Check if initialization has already been done to prevent reinitialization
         if not hasattr(self, 'led'):
+            self.log_text       = ""
             self.led            = Pin("LED", Pin.OUT)
             self.IND0           = Pin(config.IND0, Pin.OUT)
             self.IND1           = Pin(config.IND1, Pin.OUT)
@@ -32,5 +33,11 @@ class Peripherals:
             self.SD             = sdcard.SDCard(spi, config.SD_CS)
             self.RTC            = DS3231(i2c, indicator=self.IND2)
 
-# Idea here to have a peripheral initiator, that deals with more copmlex setting ups of the peripherals, and tracks there status,
+    def status_log(self, *args, **kwargs):
+        self.log_text = self.log_text + str(*args, **kwargs)
+
+    def print(self, *args, **kwargs):   # quick and dirty programming here, so i can pass peripherals instead of printlogger as an instance to modules, to catch print texts in the status log.
+        self.log_text = self.log_text + str(*args, **kwargs)
+
+# Idea here to have a peripheral initiator, that deals with more complex setting ups of the peripherals, and tracks there status,
 # all centrally in one spot, and can then be called from boot.py.
