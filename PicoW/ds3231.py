@@ -18,7 +18,7 @@ class DS3231:
         self.last_datetime_no_ms    = None
         self.indicator              = indicator
 
-    def initialize(self):
+    def initialize(self): # the idea is "is_live" function reads the status. the status can only be reset by the write_datetime function. (init function is the exception).
         self.set_control()
         if self.is_live() == False:
             return False

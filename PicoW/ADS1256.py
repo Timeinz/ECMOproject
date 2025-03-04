@@ -164,7 +164,7 @@ class ADS1256:
         while(self.DRDY.value()):
             if (counter > timeout):
                 #self.interrupt.irq(trigger=Pin.IRQ_FALLING, handler=None)
-                ph.print("Time Out ...\n")
+                ph.print("Time Out - Wait DRDY")
                 #self.lcd.move_to(0, 0)
                 #self.lcd.putstr("TO")
                 counter = 0
