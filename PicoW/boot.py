@@ -17,31 +17,33 @@ ph.bt_set_enable(True)
 # Mount the SD card at /sd
 try:
     os.mount(p.SD, '/sd')
-    p.status_log("SD card mounted successfully!")
-    p.status_log(os.listdir('/sd'))  # List files on SD card
+    ph.print("SD card mounted successfully!")
+    ph.print(os.listdir('/sd'))  # List files on SD card
 except Exception as e:
-    p.status_log("Error mounting SD card:", e)
+    ph.print("Error mounting SD card:", e)
 
 try:
     is_live = p.RTC.initialize()
-    p.status_log("RTC connected successfully!")
-    p.status_log("RTC live status: " + str(is_live))
+    ph.print("RTC connected successfully!")
+    ph.print("RTC live status: " + str(is_live))
 except Exception as e:
-    p.status_log("Error connecting to RTC:", e)
+    ph.print("Error connecting to RTC:", e)
 
 try:
     AFE_state = p.PWR_AFE.value()
     p.PWR_AFE.value(not AFE_state)  # Toggle the AFE state (on/off)
-    p.status_log("AFE:"+str(AFE_state))
+    ph.print("AFE:"+str(AFE_state))
 except Exception as e:
-    p.status_log("Error powering AFE:", e)
+    ph.print("Error powering AFE:", e)
 
 try:
     if (p.ADC.ADS1256_init(p) != 0): 
         raise Exception()
-    p.status_log("Successfully connected to ADC")
+    ph.print("Successfully connected to ADC")
 except Exception as e:
-    p.status_log("Failed to connect to ADC")
+    ph.print("Failed to connect to ADC")
+
+
 
 '''
 attempts = 10

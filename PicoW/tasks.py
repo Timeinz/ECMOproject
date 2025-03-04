@@ -13,7 +13,7 @@ timer = Timer()
 
 # Defining the task class which will be used to queue them
 class Task:
-    def __init__(self, func, priority, *args, **kwargs):
+    def __init__(self, func, priority=3, *args, **kwargs):
         self.func = func
         self.priority = priority
         self.args = args
@@ -87,3 +87,6 @@ def reboot():
 
 def gccollect():
     gc.collect()  # Call garbage collection
+
+def send_status_log():
+    ph.print(p.log_text)

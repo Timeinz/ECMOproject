@@ -47,6 +47,7 @@ class BLESimplePeripheral:
             conn_handle, _, _ = data
             print("New connection", conn_handle)
             self._connections.add(conn_handle)
+            self.new_connection = True
         elif event == _IRQ_CENTRAL_DISCONNECT:
             conn_handle, _, _ = data
             print("Disconnected", conn_handle)

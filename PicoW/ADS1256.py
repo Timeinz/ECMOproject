@@ -71,7 +71,7 @@ class ADS1256:
     def __init__(self, spi):
         self.CS             = Pin(config.ADC_CS, Pin.OUT)
         self.DRDY           = Pin(config.DRDY_PIN, Pin.IN, Pin.PULL_DOWN)
-        self.RST            = Pin(config.RST_PIN, Pin.OUT)
+        #self.RST            = Pin(config.RST_PIN, Pin.OUT)
         self.PDWN           = Pin(config.PDWN_PIN, Pin.OUT)
         self.flag           = False
         self.next_chan      = 1

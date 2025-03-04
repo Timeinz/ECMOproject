@@ -64,7 +64,7 @@ while True:
         p.ADC.flag = False
         new_tasks.append(Task(tasks.read_adc_callback, priority=1))
     now = time.ticks_ms()
-
+    
     try:
         # Create new_tasks list here, so it captures all tasks from interrupts
         current_tasks = new_tasks[:]  # Copy the current tasks to process

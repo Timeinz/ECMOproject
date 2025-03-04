@@ -17,7 +17,7 @@ SD_CS       = 21
 RST_PIN     = None  #it's not connected
 ADC_CS      = 17
 DRDY_PIN    = 20
-PDWN_PIN    = None  # was 0 before (also not connected?)
+PDWN_PIN    = 0
 
 # SPI Bus
 SCK_PIN     = 18
