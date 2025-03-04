@@ -94,7 +94,7 @@ class ADS1256:
     def DRDY_callback(self, DRDY_irq):
         self.flag = True
 
-    def ADS1256_init(self, ph):
+    def ADS1256_init(self):
         self.PDWN.value(1)
         ID = self.ADS1256_ReadChipID()
         ph.print(ID)

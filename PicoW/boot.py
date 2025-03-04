@@ -37,7 +37,7 @@ except Exception as e:
     ph.print("Error powering AFE:", e)
 
 try:
-    if (p.ADC.ADS1256_init(p) != 0): 
+    if (p.ADC.ADS1256_init() != 0): 
         raise Exception()
     ph.print("Successfully connected to ADC")
 except Exception as e:
