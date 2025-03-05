@@ -31,10 +31,28 @@ class DS3231:
         if datetime_now_no_ms != self.last_datetime_no_ms:  # new datetime value
             self.last_datetime_no_ms = datetime_now_no_ms   # init lat datetime value
             self.millis_baseline = time.ticks_ms()          # init millis baseline
-            datetime_now = urtc.datetime_tuple(*datetime_now_no_ms,millisecond=0)   # write the datetime tuple with millis = 0
+            datetime_now = urtc.datetime_tuple(         # write the datetime tuple with millis = 0
+                year=datetime_now_no_ms.year,
+                month=datetime_now_no_ms.month,
+                day=datetime_now_no_ms.day,
+                weekday=datetime_now_no_ms.weekday,
+                hour=datetime_now_no_ms.hour,
+                minute=datetime_now_no_ms.minute,
+                second=datetime_now_no_ms.second,
+                millisecond=0
+            )
         else:                                               # still the same second as previous datetime read
             millisecond = min(time.ticks_ms() - self.millis_baseline, 999)          # counted the milliseconds from first read of this second (capped at 999)
-            datetime_now = urtc.datetime_tuple(*datetime_now_no_ms,millisecond=millisecond) # write the new datetime tuple with the milliseconds value
+            datetime_now = urtc.datetime_tuple(                                     # write the new datetime tuple with the milliseconds value
+                year=datetime_now_no_ms.year,
+                month=datetime_now_no_ms.month,
+                day=datetime_now_no_ms.day,
+                weekday=datetime_now_no_ms.weekday,
+                hour=datetime_now_no_ms.hour,
+                minute=datetime_now_no_ms.minute,
+                second=datetime_now_no_ms.second,
+                millisecond=millisecond
+            )
         return datetime_now
     
     def write_datetime(self, datetime):
@@ -53,10 +71,10 @@ class DS3231:
         return not flag
     
     def set_control(self):
-        self.rtc._register(self.rtc._CONTROL_REGISTER, control)
+        self.rtc._register(self.rtc._CONTROL_REGISTER, bytearray([control]))
     
     def reset_status(self):
-        self.rtc._register(self.rtc._STATUS_REGISTER, status)
+        self.rtc._register(self.rtc._STATUS_REGISTER, bytearray([status]))
     
     def read_temperature(self):     # Reads the temperature from the DS3231 temperature registers. Returns the temperature in degrees Celsius.
         data = self.rtc.i2c.readfrom_mem(address, TEMP_MSB, 2)   # Read 2 bytes starting from TEMP_MSB (0x11)

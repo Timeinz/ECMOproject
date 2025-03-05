@@ -299,7 +299,7 @@ class ADS1256:
     
     def spi_writebyte(self, buffer):
         self.CS.value(0)
-        self.spi.write(buffer)
+        self.spi.write(bytearray(buffer))
         self.CS.value(1)
 ### END OF FILE ###
     

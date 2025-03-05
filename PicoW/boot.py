@@ -5,14 +5,14 @@ from printhandler import PrintHandler
 from peripherals import Peripherals
 
 ph  = PrintHandler()
+ph.repl_set_enable(True)
+ph.bt_set_enable(True)
+
 p   = Peripherals()
 
 # Initialize WLAN in station mode
 #wlan = network.WLAN(network.STA_IF)
 #wlan.active(True)
-
-ph.repl_set_enable(True)
-ph.bt_set_enable(True)
 
 # Mount the SD card at /sd
 try:
