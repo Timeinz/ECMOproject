@@ -7,8 +7,9 @@ from printhandler import PrintHandler
 from communication import Communication
 
 ph  = PrintHandler()
-spi = Communication.get_spi()
-i2c = Communication.get_i2c()
+spi = Communication().spi
+i2c = Communication().i2c
+
 
 class Peripherals:
     _instance = None
@@ -33,6 +34,7 @@ class Peripherals:
                 self.IND2 = Pin(config.IND2, Pin.OUT)
                 self.leds = [self.led, self.IND0, self.IND1, self.IND2]
                 self.PWR_AFE = Pin(config.PWR_AFE, Pin.OUT)
+                self.PWR_AFE.value(1)
                 self.status["pins"] = "OK"
                 self.log_text += "Pins initialized successfully\n"
                 ph.print(self.log_text.splitlines()[-1])

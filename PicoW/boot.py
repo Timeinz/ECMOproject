@@ -3,10 +3,19 @@ from time import sleep
 import credentials
 from printhandler import PrintHandler
 from peripherals import Peripherals
+from communication import Communication
+
+
+comm = Communication()  # Singleton instance
+#if comm.get_status().get("SPI") != "OK":
+#    raise RuntimeError("Critical SPI failure, halting")
+#print("Comms initialized")
 
 ph  = PrintHandler()
 ph.repl_set_enable(True)
 ph.bt_set_enable(True)
+
+ph.print(comm.get_status())
 
 p   = Peripherals()
 

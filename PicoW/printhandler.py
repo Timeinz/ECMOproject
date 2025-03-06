@@ -1,10 +1,11 @@
 from communication import Communication
 
-bt = Communication.get_ble()
+bt = Communication().ble
 
 class PrintHandler:
     _repl_enabled = False  # Class variable to control if printing is active
     _bt_enabled = False
+
 
     @classmethod
     def repl_set_enable(cls, state):
@@ -42,4 +43,6 @@ class PrintHandler:
                 message = f"{args_str}: {kwargs_str}"
             else:
                 message = args_str + '\n'
-            bt.send(message.encode('utf-8'))
+                
+            if bt is not None:
+                bt.send(message.encode('utf-8'))

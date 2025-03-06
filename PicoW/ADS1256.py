@@ -294,13 +294,13 @@ class ADS1256:
     def spi_readbytes(self, nbytes):
         self.CS.value(0)
         message = self.spi.read(nbytes)
-        self.CS.value(1)
+        #self.CS.value(1)
         return message
     
     def spi_writebyte(self, buffer):
         self.CS.value(0)
         self.spi.write(bytearray(buffer))
-        self.CS.value(1)
+        #self.CS.value(1)
 ### END OF FILE ###
     
     
