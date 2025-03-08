@@ -29,13 +29,10 @@ def toggle():
     p.led.value(not p.led.value())  # Toggle the LED state (on/off)
 
 def mainstart():
-    # set the DRDY interrupt
-    p.ADC.DRDY.irq(trigger=Pin.IRQ_FALLING, handler=p.ADC.DRDY_callback)
+    p.ADC.trigger_set(True)
 
 def mainstop():
-    # disable the DRDY interrupt
-    p.ADC.DRDY.irq(handler=None)
-    p.IND0.off()
+    p.ADC.trigger_set(False)
 
 def read_adc_callback():
     p.ADC.ADS1256_cycle_read()     # fetch raw data from ADC

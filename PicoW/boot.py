@@ -15,7 +15,7 @@ ph  = PrintHandler()
 ph.repl_set_enable(True)
 ph.bt_set_enable(True)
 
-ph.print(comm.get_status())
+ph.print(comm.get_log())
 
 p   = Peripherals()
 
