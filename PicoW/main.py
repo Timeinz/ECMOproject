@@ -9,13 +9,13 @@ import machine
 import gc
 
 p = Peripherals()
-bt = Communication.get_ble()
+bt = Communication().ble
 
 
 # Bluetooth callback function to handle the commands
-def on_rx(data):
+def ble_receive(handle, data):
     # Decode bytes to string and strip any leading/trailing whitespace or newlines
-    data = data.decode().strip()
+    data = data[1].decode().strip()
 
     # Split the string into function name and optionally priority
     parts = data.split()
@@ -45,8 +45,9 @@ def on_rx(data):
 # Make new_tasks global so it can be modified by callbacks
 new_tasks = []
 
-# set up the bluetooth receive message callback.
-bt.on_write(on_rx)  # Set the callback function for data reception
+bt.set_callback(ble_receive)
+
+
 
 # Define the timer interrupt callback function
 def gc_collect_callback(timer):

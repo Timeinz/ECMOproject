@@ -1,6 +1,6 @@
 from machine import Pin, SPI, I2C
 import bluetooth
-from ble_simple_peripheral import BLESimplePeripheral
+from ble_peripheral import BLEPeripheral
 import config
 
 
@@ -52,7 +52,7 @@ class Communication:
         try:
             ble = bluetooth.BLE()
             ble.active(True)
-            self._ble = BLESimplePeripheral(ble)
+            self._ble = BLEPeripheral(ble)
             self._status["BLE"] = "OK"
             self._log_text += "BLE OK\n"
         except Exception as e:
