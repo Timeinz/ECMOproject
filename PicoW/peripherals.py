@@ -34,7 +34,11 @@ class Peripherals:
                 self.IND2 = Pin(config.IND2, Pin.OUT)
                 self.leds = [self.led, self.IND0, self.IND1, self.IND2]
                 self.PWR_AFE = Pin(config.PWR_AFE, Pin.OUT)
-                self.PWR_AFE.value(1)
+                self.PWR_AFE.value(1) # Powering the AFE
+                self.SD_CS = Pin(config.SD_CS, Pin.OUT)
+                self.SD_CS.value(1) # CS pin high = communication off
+                self.ADC_CS = Pin(config.ADC_CS, Pin.OUT)
+                self.ADC_CS.value(1) # CS pin high = communication off
                 self.status["pins"] = "OK"
                 self.log_text += "Pins initialized successfully\n"
                 ph.print(self.log_text.splitlines()[-1])
@@ -45,7 +49,7 @@ class Peripherals:
             
             # Initialize ADC
             try:
-                self.ADC = ADS1256(spi)
+                self.ADC = ADS1256(spi, self.ADC_CS)
                 init_result = self.ADC.ADS1256_init()
                 
                 if init_result == 0:
@@ -69,7 +73,7 @@ class Peripherals:
             
             # Initialize SD card
             try:
-                self.SD = sdcard.SDCard(spi, Pin(config.SD_CS))
+                self.SD = sdcard.SDCard(spi, self.SD_CS)
                 self.status["SD"] = "OK"
                 self.log_text += "SD card initialized successfully\n"
                 ph.print(self.log_text.splitlines()[-1])

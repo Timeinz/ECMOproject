@@ -1,9 +1,10 @@
 import bluetooth
 import struct
 from micropython import const
-from machine import Pin
-import time
-from ble_constants import UUID_map, NAME
+from ble_advertising import advertising_payload
+from ble_constants import Char_UUID_map, NAME, Service_UUID
+
+# we are assuming only one service
 
 # Constants   
 _IRQ_CENTRAL_CONNECT = const(1)
@@ -13,24 +14,37 @@ _FLAG_READ = const(0x0002)
 _FLAG_WRITE = const(0x0004)
 _FLAG_NOTIFY = const(0x0010)
 
-# Custom UUIDs
-_SERVICE_UUID = bluetooth.UUID(UUID_map["Service"])
-_CHAR_UUID = (bluetooth.UUID(UUID_map["Send_data"]), _FLAG_NOTIFY)
-_CHAR_UUID = (bluetooth.UUID(UUID_map["Receive_CMD"]), _FLAG_WRITE)
 
-# BLE Service
-_BLE_SERVICE = (_SERVICE_UUID, (_CHAR_UUID,))
+_chars = []
+for char in Char_UUID_map:
+    char_copy = char.copy()
+    # Add flags based on designation
+    if char_copy["designation"] == "Send_data":
+        char_copy["flags"] = _FLAG_NOTIFY
+    elif char_copy["designation"].startswith("Receive_"):
+        char_copy["flags"] = _FLAG_WRITE
+    else:
+        char_copy["flags"] = _FLAG_READ
+    _chars.append(char_copy)
+
+
+# declaring the service.
+_BLE_SERVICE = (bluetooth.UUID(Service_UUID), [(bluetooth.UUID(char["uuid"]), char["flags"]) for char in _chars])
+
 
 class BLEPeripheral:
     def __init__(self, ble, name=NAME):
         self._ble = ble
         self._ble.active(True)
         self._ble.irq(self._irq)
-        ((self._handle,),) = self._ble.gatts_register_services((_BLE_SERVICE,))
+        self._handles = self._ble.gatts_register_services((_BLE_SERVICE,))[0]  # Get handles for first service
+        self._handle_map = {h: {"designation": c["designation"], "uuid": c["uuid"]} for h, c in zip(self._handles, _chars)}
+        self._designation_map = {c["designation"]: {"handle": h, "uuid": c["uuid"]} for h, c in zip(self._handles, _chars)}
+        self._uuid_map = {c["uuid"]: {"handle": h, "designation": c["designation"]} for h, c in zip(self._handles, _chars)}
         self._connections = set()
         self._max_connections = 1  # Only one concurrent connection
         self._receive_callback = None
-        self._payload = struct.pack("B", len(name)) + name.encode() + bytes(_SERVICE_UUID)
+        self._payload = advertising_payload(name=name)
         self._advertise()
     
 
@@ -53,7 +67,7 @@ class BLEPeripheral:
                 self._receive_callback(value_handle, value)
 
     def _advertise(self):
-        self._ble.gap_advertise(50000, adv_data=self._payload)
+        self._ble.gap_advertise(500000, adv_data=self._payload)
 
     def send(self, handle, data):
         for conn_handle in self._connections:

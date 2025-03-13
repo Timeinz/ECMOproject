@@ -31,27 +31,6 @@ try:
 except Exception as e:
     ph.print("Error mounting SD card:", e)
 
-try:
-    is_live = p.RTC.initialize()
-    ph.print("RTC connected successfully!")
-    ph.print("RTC live status: " + str(is_live))
-except Exception as e:
-    ph.print("Error connecting to RTC:", e)
-
-try:
-    AFE_state = p.PWR_AFE.value()
-    p.PWR_AFE.value(not AFE_state)  # Toggle the AFE state (on/off)
-    ph.print("AFE:"+str(AFE_state))
-except Exception as e:
-    ph.print("Error powering AFE:", e)
-
-try:
-    if (p.ADC.ADS1256_init() != 0): 
-        raise Exception()
-    ph.print("Successfully connected to ADC")
-except Exception as e:
-    ph.print("Failed to connect to ADC")
-
 
 
 '''

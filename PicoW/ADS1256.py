@@ -68,8 +68,8 @@ CMD = {'CMD_WAKEUP'     : 0x00,    # Completes SYNC and Exits Standby Mode 0000 
       }
 
 class ADS1256:
-    def __init__(self, spi):
-        self.CS             = Pin(config.ADC_CS, Pin.OUT)
+    def __init__(self, spi, cs):
+        self.CS             = cs
         self.DRDY           = Pin(config.DRDY_PIN, Pin.IN, Pin.PULL_DOWN)
         #self.RST            = Pin(config.RST_PIN, Pin.OUT)
         self.PDWN           = Pin(config.PDWN_PIN, Pin.OUT)
