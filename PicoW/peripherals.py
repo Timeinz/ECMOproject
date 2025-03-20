@@ -70,7 +70,7 @@ class Peripherals:
                 self.status["ADC"] = f"ERROR: {str(e)}"
                 self.log_text += f"ADC failed: {str(e)}\n"
                 ph.print(self.log_text.splitlines()[-1])
-            '''
+            
             # Initialize SD card
             try:
                 self.SD = sdcard.SDCard(spi, self.SD_CS)
@@ -111,7 +111,7 @@ class Peripherals:
                 self.status["SD"] = f"ERROR: {str(e)}"
                 self.log_text += f"SD card failed: {str(e)}\n"
                 ph.print(self.log_text.splitlines()[-1])
-            '''
+            
             # Initialize RTC
             try:
                 self.RTC = DS3231(i2c, indicator=self.IND2)
