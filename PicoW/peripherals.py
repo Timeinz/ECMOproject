@@ -14,17 +14,17 @@ i2c = Communication().i2c
 class Peripherals:
     _instance = None
 
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(Peripherals, cls).__new__(cls)
-            cls._instance.__init__()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self, debug=False):
         # Check if initialization has already been done to prevent reinitialization
         if not hasattr(self, 'log_text'):
             self.log_text = ""
             self.status = {}  # Dictionary to track peripheral status
+            self.debug = debug
             
             # Initialize basic pins first
             try:
@@ -49,7 +49,7 @@ class Peripherals:
             
             # Initialize ADC
             try:
-                self.ADC = ADS1256(spi, self.ADC_CS)
+                self.ADC = ADS1256(spi, self.ADC_CS, baudrate=config.ADC_SPI_BAUDRATE, debug=self.debug)
                 init_result = self.ADC.ADS1256_init()
                 
                 if init_result == 0:
@@ -73,7 +73,7 @@ class Peripherals:
             
             # Initialize SD card
             try:
-                self.SD = sdcard.SDCard(spi, self.SD_CS)
+                self.SD = sdcard.SDCard(spi, self.SD_CS, baudrate=config.SD_SPI_BAUDRATE, debug=self.debug)
                 self.status["SD"] = "OK"
                 self.log_text += "SD card OK\n"
                 ph.print(self.log_text.splitlines()[-1])

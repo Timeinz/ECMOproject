@@ -18,6 +18,9 @@ class Communication:
             self._spi = None
             self._i2c = None
             self._ble = None
+            self._spi_baudrate = 100000 # dummy values will be overwritten by the peripherals
+            self._spi_phase = 0
+            self._spi_polarity = 0
             self._status = {}
             self._log_text = ""
             self._initialize()
@@ -26,12 +29,12 @@ class Communication:
     def _initialize(self):
         try:
             self._spi = SPI(config.SPI_CONTROLLER,
-                            baudrate=config.SPI_BAUDRATE,
+                            baudrate=self._spi_baudrate,
                             sck=Pin(config.SCK_PIN),
                             mosi=Pin(config.MOSI_PIN),
                             miso=Pin(config.MISO_PIN),
-                            phase=1,
-                            polarity=0)
+                            phase=self._spi_phase,
+                            polarity=self._spi_polarity)
             self._status["SPI"] = "OK"
             self._log_text += "SPI OK\n"
         except Exception as e:
@@ -64,6 +67,31 @@ class Communication:
         if self._spi is None:
             raise RuntimeError("SPI not initialized")
         return self._spi
+
+    @property
+    def spi_config(self): # Get the current SPI configuration parameters.
+        return {
+            "baudrate": self._spi_baudrate,  # Default from config
+            "phase": self._spi_phase,  # Default used in initialization
+            "polarity": self._spi_polarity  # Default used in initialization
+        }
+    
+    @spi_config.setter
+    def spi_config(self, params):
+        """
+        Set SPI configuration parameters without reinitializing.
+        
+        Args:
+            params: dict with baudrate, phase, and/or polarity
+        """
+        # Simply store the configuration values for reference
+        # This doesn't change the actual SPI configuration
+        if "baudrate" in params:
+            self._spi_baudrate = params["baudrate"]
+        if "phase" in params:
+            self._spi_phase = params["phase"]
+        if "polarity" in params:
+            self._spi_polarity = params["polarity"]
 
     @property
     def i2c(self):

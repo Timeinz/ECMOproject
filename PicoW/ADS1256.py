@@ -2,9 +2,8 @@ import config
 import time
 import coefficients
 from machine import Pin
-from printhandler import PrintHandler
+from communication import Communication
 
-ph = PrintHandler()
 ScanMode = 0
 
 # gain channel
@@ -68,8 +67,9 @@ CMD = {'CMD_WAKEUP'     : 0x00,    # Completes SYNC and Exits Standby Mode 0000 
       }
 
 class ADS1256:
-    def __init__(self, spi, cs):
+    def __init__(self, spi, cs, baudrate=1920000, debug=False):
         self.CS             = cs
+        self.baudrate       = baudrate
         self.DRDY           = Pin(config.DRDY_PIN, Pin.IN, Pin.PULL_DOWN)
         #self.RST            = Pin(config.RST_PIN, Pin.OUT)
         self.PDWN           = Pin(config.PDWN_PIN, Pin.OUT)
@@ -81,6 +81,20 @@ class ADS1256:
         self.read_flag      = False
         self.chan           = []
         self.spi            = spi
+        self.debug          = debug
+
+    def print(self, *args, **kwargs): # Debug print function for ADS1256 operations.
+        if hasattr(self, 'debug') and self.debug:
+            prefix = "[ADS1256] "
+            if args:
+                # Convert first argument to string and prepend prefix
+                args = (prefix + str(args[0]),) + args[1:]
+            else:
+                args = (prefix,)
+            
+            # Use standard print function with all passed arguments and kwargs
+            print(*args, **kwargs)
+        # Silently ignore if debug is disabled
 
     class channel_cal:
         def __init__(self, c0, c1):
@@ -104,11 +118,11 @@ class ADS1256:
         self.PDWN.value(1)
         time.sleep_ms(100)
         ID = self.ADS1256_ReadChipID()
-        ph.print("ADC ID: ", ID)
+        self.print("ADC ID: ", ID)
         if ID == 3 :
-            ph.print("ID Read success")
+            self.print("ID Read success")
         else:
-            ph.print("ID Read failed")
+            self.print("ID Read failed")
             #self.lcd.putstr("ID Read failed")
             return -1
         
@@ -127,7 +141,7 @@ class ADS1256:
                                                  CMD['CMD_RREG'],
                                                  0x03],
                                                  nbytes=4)
-        ph.print(read)
+        self.print(read)
         #self.lcd.move_to(0, 0)
         #self.lcd.putstr(str(read))
         self.spi_write_read_bytes(buffer=[CMD['CMD_SELFCAL']])
@@ -160,13 +174,13 @@ class ADS1256:
         timeout = 200000
         while(not self.DRDY.value()):       # Falling edge detection of DRDY
             if (counter > timeout):
-                ph.print("Time Out - Wait DRDY")
+                self.print("Time Out - Wait DRDY")
                 counter = 0
                 return 1
             counter += 1
         while(self.DRDY.value()):
             if (counter > timeout):
-                ph.print("Time Out - Wait DRDY")
+                self.print("Time Out - Wait DRDY")
                 return 1
             counter += 1
         return 0
@@ -239,7 +253,7 @@ class ADS1256:
         if (read & 0x800000):
             read &= 0xF000000
         
-        print(read)
+        self.print(read)
 
     def ADS1256_GetChannelValue(self, PChannel, NChannel):
         if(ScanMode == 0):# 0  Single-ended input  8 channel1 Differential input  4 channe 
@@ -270,6 +284,24 @@ class ADS1256:
     
     def spi_write_read_bytes(self, buffer=None, nbytes=None):
         message = None
+        
+        # Get the communication singleton's stored SPI config
+        comm = Communication()
+        spi_config = comm.spi_config
+        
+        # Check if current config differs from what ADS1256 needs
+        if (spi_config.get("baudrate") != self.baudrate or 
+            spi_config.get("phase") != 1 or 
+            spi_config.get("polarity") != 0):
+            
+            # Update the stored config values
+            comm.spi_config = {"baudrate": self.baudrate, "phase": 1, "polarity": 0}
+            
+            # Actually reinitialize the SPI bus with our needed parameters
+            self.spi.init(baudrate=self.baudrate, phase=1, polarity=0)
+            self.print(f"SPI reconfigured for ADS1256 (baudrate={self.baudrate})")
+        
+        # Perform communication
         self.CS.value(0)
         if buffer:
             self.spi.write(bytearray(buffer))

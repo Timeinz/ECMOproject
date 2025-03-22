@@ -17,16 +17,12 @@ ph.bt_set_enable(True)
 
 ph.print(comm.get_log())
 
-p   = Peripherals()
-
-# Initialize WLAN in station mode
-#wlan = network.WLAN(network.STA_IF)
-#wlan.active(True)
+p   = Peripherals(debug=False)
 
 # Mount the SD card at /sd
 try:
     os.mount(p.SD, '/sd')
-    ph.print("SD card mounted successfully!")
+    ph.print("SD card mounted successfully")
     ph.print(os.listdir('/sd'))  # List files on SD card
 except Exception as e:
     ph.print("Error mounting SD card:", e)
@@ -34,6 +30,11 @@ except Exception as e:
 
 
 '''
+
+# Initialize WLAN in station mode
+#wlan = network.WLAN(network.STA_IF)
+#wlan.active(True)
+
 attempts = 10
 while attempts > 0:
     
