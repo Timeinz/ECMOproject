@@ -12,10 +12,24 @@ p = Peripherals()
 bt = Communication().ble
 
 
+# Make new_tasks global so it can be modified by callbacks
+new_tasks = []
+
+
 # Bluetooth callback function to handle the commands
+
+# this is an extension of the BLE IRQ_GATTS_WRITE handler.
+# the core handler is independently outlined in the BLE driver (ble_peripheral in this case).
+# the handler in the core driver file is meant to only do low-level generic BLE stuff,
+# while the high-level part of the interrupt is meant to handle application specific things
+# like inserting things into the task queue or reading from different characteristics and
+# handling things differently dependent on this.
 def ble_receive(handle, data):
+
+    # if handle == characteristic uuid of the handle according to the lookup table only then do the following ? (specific handler for application commands)
+
     # Decode bytes to string and strip any leading/trailing whitespace or newlines
-    data = data[1].decode().strip()
+    data = data.decode().strip()
 
     # Split the string into function name and optionally priority
     parts = data.split()
@@ -42,12 +56,7 @@ def ble_receive(handle, data):
     except AttributeError:
         ph.print(f"Error: Function '{func_name}' not found in tasks module.")
 
-# Make new_tasks global so it can be modified by callbacks
-new_tasks = []
-
 bt.set_callback(ble_receive)
-
-
 
 # Define the timer interrupt callback function
 def gc_collect_callback(timer):
@@ -74,7 +83,7 @@ while True:
             q.manage_queue(current_tasks)
         task = q.dequeue()
         if task is not None:
-            #ph.print(task.func.__name__)
+            ph.print(task.func.__name__)
             task.func(*task.args, **task.kwargs)  # Execute task with any provided arguments
 
     except Exception as e:

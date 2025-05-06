@@ -53,13 +53,13 @@ class BLEPeripheral:
             conn_handle, _, _ = data
             if len(self._connections) < self._max_connections:
                 self._connections.add(conn_handle)
-                self._ble.gap_advertise(None)  # Stop advertising
+                #self._ble.gap_advertise(None)  # Stop advertising
             else:
                 pass
         elif event == _IRQ_CENTRAL_DISCONNECT:
             conn_handle, _, _ = data
             self._connections.remove(conn_handle)
-            self._advertise()  # Restart advertising
+            #self._advertise()  # Restart advertising
         elif event == _IRQ_GATTS_WRITE:
             conn_handle, value_handle = data
             value = self._ble.gatts_read(value_handle)
@@ -67,10 +67,11 @@ class BLEPeripheral:
                 self._receive_callback(value_handle, value)
 
     def _advertise(self):
-        self._ble.gap_advertise(500000, adv_data=self._payload)
+        self._ble.gap_advertise(100000, adv_data=self._payload)
 
     def send(self, handle, data):
         for conn_handle in self._connections:
+            print(conn_handle, handle, data)
             self._ble.gatts_notify(conn_handle, handle, data)
     
     def set_callback(self, callback):

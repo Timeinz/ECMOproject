@@ -45,4 +45,4 @@ class PrintHandler:
                 message = args_str + '\n'
                 
             if bt is not None:
-                bt.send(bt._designation_map["Receive_CMD"]["handle"], message.encode('utf-8'))
+                bt.send(bt._designation_map["Send_data"]["handle"], message.encode('utf-8'))
