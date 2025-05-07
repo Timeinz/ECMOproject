@@ -71,7 +71,6 @@ class BLEPeripheral:
 
     def send(self, handle, data):
         for conn_handle in self._connections:
-            print(conn_handle, handle, data)
             self._ble.gatts_notify(conn_handle, handle, data)
     
     def set_callback(self, callback):

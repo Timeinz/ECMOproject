@@ -83,7 +83,7 @@ while True:
             q.manage_queue(current_tasks)
         task = q.dequeue()
         if task is not None:
-            ph.print(task.func.__name__)
+            #ph.print(task.func.__name__)
             task.func(*task.args, **task.kwargs)  # Execute task with any provided arguments
 
     except Exception as e:

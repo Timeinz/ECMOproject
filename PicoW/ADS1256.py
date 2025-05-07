@@ -157,7 +157,7 @@ class ADS1256:
             self.read_flag = True
         
         setChnCMD = self.ADS1256_SetChannel(8,self.next_chan)
-        buf = self.spi_write_read_bytes(buffer=[setChnCMD, CMD['CMD_SYNC'], CMD['CMD_WAKEUP'], CMD['CMD_RDATA']], nbytes=3) # command sequence taken from datasheet
+        buf = self.spi_write_read_bytes(buffer=setChnCMD + [CMD['CMD_SYNC'], CMD['CMD_WAKEUP'], CMD['CMD_RDATA']], nbytes=3) # command sequence taken from datasheet
         self.raw.append(self.ADS1256_Parse_ADC_Data(buf))
         #ph.print(self.raw)
         self.next_chan += 1 
@@ -260,7 +260,7 @@ class ADS1256:
             if(PChannel>8 or NChannel>8):
                 return 0
             setChnCMD = self.ADS1256_SetChannel(PChannel, NChannel)
-            self.spi_write_read_bytes(buffer=bytearray([setChnCMD, CMD['CMD_SYNC']]))
+            self.spi_write_read_bytes(buffer=bytearray(setChnCMD + [CMD['CMD_SYNC']]))
             # self.delay_ms(10)
             self.spi_write_read_bytes(buffer=bytearray([CMD['CMD_WAKEUP']]))
             # self.delay_ms(200)

@@ -18,7 +18,11 @@ notifier = ''
 
 async def scan_ble_devices():
     global NAME, device, msg, commander, notifier
-    device = await BleakScanner.find_device_by_name(NAME, timeout=1.0)
+    try:
+        device = await BleakScanner.find_device_by_name(NAME, timeout=5.0)
+    except Exception as e:
+        print(e)
+        return
     if not device:
         print("Device not found")
         return
@@ -49,17 +53,34 @@ async def scan_ble_devices():
         print(f'notifier: {notifier.handle}')
         await client.start_notify(notifier.uuid, receive_notifications)
         print("Listening for notifications...")
+
+        await client.write_gatt_char(commander, f"mainstart".encode())
+        
+        await asyncio.sleep(7)  # Wait for data
+        
+
+        await client.write_gatt_char(commander, f"mainstop".encode())
         await client.write_gatt_char(commander, f"{msg}".encode())
+        await asyncio.sleep(1)  # Wait for data
+        await client.write_gatt_char(commander, f"{msg}".encode())
+        await asyncio.sleep(1)  # Wait for data
+        await client.write_gatt_char(commander, f"{msg}".encode())
+
+        await client.stop_notify(notifier)
+        
+
+'''
+
         await asyncio.sleep(1)  # Wait for data
         await client.write_gatt_char(commander, f"{msg}".encode())
         await asyncio.sleep(1)  # Wait for data
         await client.write_gatt_char(commander, f"{msg}".encode())
         await asyncio.sleep(5)  # Wait for data
-        await client.stop_notify(notifier)
-        
+'''
+
 
 async def receive_notifications(client, data):
-    print(f"Received: {data.decode()}")
+    print(f"Received: {data.decode().strip()}")
 
 
 
