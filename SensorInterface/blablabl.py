@@ -1,6 +1,12 @@
 import asyncio
 from bleak import BleakScanner, BleakClient
 
+import numpy as np
+import sys
+from PyQt6.QtWidgets import QMainWindow, QApplication, QFileDialog
+from PyQt6.QtCore import pyqtSignal, QObject, QThread
+from qtdesigner import Ui_MplMainWindow
+from mpllaunch_qt_designer import DesignerMainWindow
 
 
 NAME = "ECMOSensor"
@@ -10,11 +16,20 @@ msg = "toggle"
 commander = ''
 notifier = ''
 
+
 # Docu:
 # first scan for BLE advertisements
 # then select the device that matches our intended name
 # then ask for its services
 
+class AsyncioThread(QThread):
+    def __init__(self):
+        super().__init__()
+    
+    def run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(scan_ble_devices())
 
 async def scan_ble_devices():
     global NAME, device, msg, commander, notifier
@@ -55,6 +70,8 @@ async def scan_ble_devices():
         print("Listening for notifications...")
 
         await client.write_gatt_char(commander, f"mainstart".encode())
+    
+    
         
         await asyncio.sleep(7)  # Wait for data
         
@@ -79,10 +96,27 @@ async def scan_ble_devices():
 '''
 
 
+
+
 async def receive_notifications(client, data):
     print(f"Received: {data.decode().strip()}")
+    dmw.sensor.signalize()
 
 
+class sensor_signal(QObject):
+    data_received = pyqtSignal()
+
+    def signalize(self):
+        print("signalizing")
+        self.data_received.emit()
 
 if __name__ == "__main__":
-    asyncio.run(scan_ble_devices())
+    sensorext = sensor_signal()
+    app = QApplication(sys.argv)
+    dmw = DesignerMainWindow(external=sensorext)
+    dmw.show()
+
+    ble_thread = AsyncioThread()
+    ble_thread.start()
+
+    sys.exit(app.exec())
