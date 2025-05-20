@@ -24,6 +24,7 @@ data_list = [[],[],[],[],[],[],[],[],[]]
 
 class BLE_module(QObject):
     data_received = pyqtSignal(list)
+    notification_print = pyqtSignal(str, bool) # message to print, bool coming from pico?
 
     def __init__(self):
         super().__init__()
@@ -45,45 +46,51 @@ class BLE_module(QObject):
     def run_asyncio(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-        self.loop.run_until_complete(self.scan_ble_devices())
+        self.loop.create_task(self.loop_connect())
+        self.loop.run_forever()
 
-    async def scan_ble_devices(self):
+    async def loop_connect(self):
+        while True:
+            await self.ble_connection()
+            await asyncio.sleep(1)
+
+    async def ble_connection(self):
         global NAME, device, msg, commander, notifier
         try:
             device = await BleakScanner.find_device_by_name(NAME, timeout=5.0)
         except Exception as e:
-            print(e)
+            self.notification_printer(e)
             return
         if not device:
-            print("Device not found")
+            self.notification_printer("Device not found")
             return
         async with BleakClient(device) as client:
             self.client = client
-            print(f"Connected to {device.address}")
+            self.notification_printer(f"Connected to {device.address}")
             services = client.services
-            print("Services:")
+            self.notification_printer("Services:")
             for service in services:
-                print(f"  {service}")
+                self.notification_printer(f"  {service}")
                 for char in service.characteristics:
-                    print(f"  Characteristic: {char.uuid}, Properties: {char.properties}, Handle: {char.handle}")
+                    self.notification_printer(f"  Characteristic: {char.uuid}, Properties: {char.properties}, Handle: {char.handle}")
                     if "read" in char.properties:
                         try:
                             value = await client.read_gatt_char(char)
-                            print(f"    Value: {value}")
+                            self.notification_printer(f"    Value: {value}")
                         except Exception as e:
-                            print(f"    Failed to read: {e}")
+                            self.notification_printer(f"    Failed to read: {e}")
                     if "write-without-response" in char.properties:
                         commander = char.uuid
                     if "notify" in char.properties:
                         notifier = char
             
-            print(f'notifier: {notifier.handle}')
+            self.notification_printer(f'notifier: {notifier.handle}')
             await client.start_notify(notifier.uuid, self.receive_notifications)
-            print("Listening for notifications...")
+            self.notification_printer("Listening for notifications...")
             
             # Keep connection alive with non-blocking sleep
             while self.client.is_connected:
-                await asyncio.sleep(0.1)  # Short sleep to yield control
+                await asyncio.sleep(0.01)  # Short sleep to yield control
 
 
     async def receive_notifications(self, x, data, throwaway=None):
@@ -94,24 +101,26 @@ class BLE_module(QObject):
             for i in range(len(data_list)):
                 data_list[i].append(raw[i])
                 del data_list[i][:trim]
-            print(f"Received: {raw}")
+            #self.notification_printer(f"Received: {raw}")
             self.data_received.emit(data_list)
         except Exception as e:
-            print(e)
+            self.notification_printer(e)
     
     def send_message(self, msg):
         if self.client and self.loop:
             # Schedule write task in asyncio loop
             asyncio.run_coroutine_threadsafe(self.write_message(msg), self.loop)
         else:
-            print("BLE not connected")
+            self.notification_printer("BLE not connected")
 
     async def write_message(self, msg):
         """Write data to BLE characteristic."""
         try:
             if self.client:
                 await self.client.write_gatt_char(commander, f"{msg}".encode())
-                print(f"Sent to BLE: {msg}")
+                self.notification_printer(f"Sent to BLE: {msg}")
         except Exception as e:
-            print(f"Write error: {e}")
+            self.notification_printer(f"Write error: {e}")
 
+    def notification_printer(self, message, remote=False):
+        self.notification_print.emit(message, remote)

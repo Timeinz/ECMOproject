@@ -15,6 +15,7 @@ if __name__ == "__main__":
     ble = BLE_module()
 
     ble.data_received.connect(gui.update_graph, type=Qt.ConnectionType.QueuedConnection)
+    ble.notification_print.connect(gui.notification_printer)
     gui.send_message.connect(ble.send_message)
 
     gui.show()
