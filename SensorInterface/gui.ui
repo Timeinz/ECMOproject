@@ -6,39 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>405</width>
-    <height>394</height>
+    <width>690</width>
+    <height>534</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Tim's EcmoGui</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normalon>:/img/img/logo.png</normalon>
+   </iconset>
   </property>
   <widget class="QWidget" name="mplcentralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <layout class="QHBoxLayout" name="mplhorizontalLayout">
-      <item>
-       <widget class="QLineEdit" name="mpllineEdit">
-        <property name="text">
-         <string>C://</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="mplpushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Parse this file</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
     <item>
      <widget class="MplWidget" name="mpl" native="true">
       <property name="sizePolicy">
@@ -49,6 +30,37 @@
       </property>
      </widget>
     </item>
+    <item>
+     <layout class="QHBoxLayout" name="mplhorizontalLayout">
+      <item>
+       <widget class="QPushButton" name="start_button">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stop_button">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="toggle_button">
+        <property name="text">
+         <string>Toggle</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="mplmenubar">
@@ -56,19 +68,10 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>405</width>
+     <width>690</width>
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="mplmenuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="mplactionOpen"/>
-    <addaction name="separator"/>
-    <addaction name="mplactionQuit"/>
-   </widget>
-   <addaction name="mplmenuFile"/>
   </widget>
   <action name="mplactionOpen">
    <property name="text">
@@ -89,6 +92,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections/>
 </ui>
