@@ -33,16 +33,20 @@ def mainstart():
 
 def mainstop():
     p.ADC.trigger_set(False)
+    p.ADC.ditch1meas = True
 
 def read_adc_callback():
     p.ADC.ADS1256_cycle_read()     # fetch raw data from ADC
     
     if p.ADC.read_flag:
-        read = [dtc.to_human_int(p.RTC.read_datetime())]        # initate read. also take the time in ms, convert to human-readable int.
-        for i in range(0, p.ADC.num_of_chans):                  # convert ADC reading to temp using calibrattion coefficients
-            read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
-        #dw.write_data(read)
-        ph.print(read)
+        if p.ADC.ditch1meas:
+            p.ADC.ditch1meas = False
+        else:
+            read = [dtc.to_human_int(p.RTC.read_datetime())]        # initate read. also take the time in ms, convert to human-readable int.
+            for i in range(0, p.ADC.num_of_chans):                  # convert ADC reading to temp using calibrattion coefficients
+                read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
+            #dw.write_data(read)
+            ph.print(read)
 
 def togglephrepl():
     ph.repl_set_enable(not ph.repl_is_enabled())

@@ -82,6 +82,7 @@ class ADS1256:
         self.chan           = []
         self.spi            = spi
         self.debug          = debug
+        self.ditch1meas     = True
 
     def print(self, *args, **kwargs): # Debug print function for ADS1256 operations.
         if hasattr(self, 'debug') and self.debug:
@@ -123,7 +124,6 @@ class ADS1256:
             self.print("ID Read success")
         else:
             self.print("ID Read failed")
-            #self.lcd.putstr("ID Read failed")
             return -1
         
         #setup calibration coefficients for each ADC channel
@@ -136,8 +136,8 @@ class ADS1256:
                                                  0x03,
                                                  0x02,
                                                  0x80,
-                                                 ADS1256_GAIN_E['ADS1256_GAIN_1'],
-                                                 ADS1256_DRATE_E['ADS1256_100SPS'],
+                                                 ADS1256_GAIN_E[config.ADS1256_GAIN],
+                                                 ADS1256_DRATE_E[config.ADS1256_DATARATE],
                                                  CMD['CMD_RREG'],
                                                  0x03],
                                                  nbytes=4)
@@ -156,8 +156,14 @@ class ADS1256:
             self.next_chan = 0
             self.read_flag = True
         
-        setChnCMD = self.ADS1256_SetChannel(8,self.next_chan)
-        buf = self.spi_write_read_bytes(buffer=setChnCMD + [CMD['CMD_SYNC'], CMD['CMD_WAKEUP'], CMD['CMD_RDATA']], nbytes=3) # command sequence taken from datasheet
+        setChnCMD = self.ADS1256_SetChannel(8, self.next_chan)
+        buf = self.spi_write_read_bytes(buffer =
+                                        [CMD['CMD_WREG'] | REG_E['REG_MUX']] +
+                                        setChnCMD +
+                                        [CMD['CMD_SYNC'],
+                                         CMD['CMD_WAKEUP'],
+                                         CMD['CMD_RDATA']],
+                                         nbytes=3)              # command sequence taken from datasheet
         self.raw.append(self.ADS1256_Parse_ADC_Data(buf))
         #ph.print(self.raw)
         self.next_chan += 1 
@@ -199,7 +205,7 @@ class ADS1256:
         read |= (buf[1]<<8) & 0xff00
         read |= (buf[2]) & 0xff
         if (read & 0x800000):
-            read &= 0xF000000
+            read = -(~read & 0xFFFFFF) - 1  # Two's complement conversion
         return read
     
     def ADS1256_Read_ADC_Data(self):
@@ -208,7 +214,7 @@ class ADS1256:
         read |= (buf[1]<<8) & 0xff00
         read |= (buf[2]) & 0xff
         if (read & 0x800000):
-            read &= 0xF000000
+            read = -(~read & 0xFFFFFF) - 1  # Two's complement conversion
         return read
         
     def ADS1256_SetChannel(self, PChannel, NChannel):
@@ -284,7 +290,6 @@ class ADS1256:
     
     def spi_write_read_bytes(self, buffer=None, nbytes=None):
         message = None
-        
         # Get the communication singleton's stored SPI config
         comm = Communication()
         spi_config = comm.spi_config
@@ -303,7 +308,7 @@ class ADS1256:
         
         # Perform communication
         self.CS.value(0)
-        if buffer:
+        if buffer: 
             self.spi.write(bytearray(buffer))
             if nbytes:
                 time.sleep_us(7) # timings taken from the datasheet and the CLKIN frequency (7.68 MHz)

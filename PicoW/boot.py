@@ -4,6 +4,7 @@ import credentials
 from printhandler import PrintHandler
 from peripherals import Peripherals
 from communication import Communication
+import config
 
 
 comm = Communication()  # Singleton instance
@@ -17,7 +18,7 @@ ph.bt_set_enable(True)
 
 ph.print(comm.get_log())
 
-p   = Peripherals(debug=False)
+p   = Peripherals(debug=config.DEBUG)
 
 # Mount the SD card at /sd
 try:

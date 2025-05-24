@@ -7,6 +7,7 @@ from communication import Communication
 import queue as q
 import machine
 import gc
+import sys
 
 p = Peripherals()
 bt = Communication().ble
@@ -88,6 +89,7 @@ while True:
 
     except Exception as e:
         ph.print(e)
+        sys.print_exception(e)
     
     if time.ticks_ms() - now > 1000:  # notification to debug slow tasks
         ph.print("overtime")
@@ -97,4 +99,4 @@ while True:
         #machine.idle()
     #machine.idle() doesn't seem to be working ...
     #gc.collect()
-    time.sleep_ms(1)
+    #time.sleep_ms(1)
