@@ -45,7 +45,6 @@ class PrintHandler:
                 message = args_str + '\n'
                 
             if bt is not None:
-                print(bt._designation_map["notification"]["handle"])
                 bt.send(bt._designation_map["notification"]["handle"], message.encode('utf-8'))
                 
     @classmethod
@@ -62,5 +61,4 @@ class PrintHandler:
             message = args_str + '\n'
             
         if bt is not None:
-            print(bt._designation_map["send_data"]["handle"])
             bt.send(bt._designation_map["send_data"]["handle"], message.encode('utf-8'))

@@ -91,15 +91,17 @@ class BLE_module(QObject):
                         notifier.append(char)
             
             self.notification_printer(f'notifier: {notifier[1].handle}')
-            await client.start_notify(notifier[1].uuid, self.receive_data)
+            await client.start_notify(notifier[0].uuid, self.receive_data)
+            #await client.start_notify("c1536c4a-eb2f-4f0a-ab7b-c56656e726b3", self.receive_data)
             self.notification_printer("Listening for data...")
 
             self.notification_printer(f'notifier: {notifier[0].handle}')
-            await client.start_notify(notifier[0].uuid, self.receive_notifications)
+            await client.start_notify(notifier[1].uuid, self.receive_notifications)
             self.notification_printer("Listening for notifications...")
             
             #print the status
-
+            for char in notifier:
+                print(char.uuid, char.description, char.handle)
             # Keep connection alive with non-blocking sleep
             while self.client.is_connected:
                 await asyncio.sleep(0.01)  # Short sleep to yield control
@@ -111,6 +113,7 @@ class BLE_module(QObject):
 
     async def receive_data(self, x, data):
         global data_list
+        print("bla")
         try:
             raw = ast.literal_eval(data.decode().strip())
             trim = min( len(data_list[0]) - self.window_length, 0)
@@ -144,4 +147,4 @@ class BLE_module(QObject):
             self.notification_printer(f"Write error: {e}")
 
     def notification_printer(self, message, remote=False):
-        self.notification_print.emit(message, remote)
+        self.notification_print.emit(str(message), remote)

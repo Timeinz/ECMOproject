@@ -35,6 +35,7 @@ for char in Char_UUID_map:
 
 # declaring the service.
 _BLE_SERVICE = (bluetooth.UUID(Service_UUID), [(bluetooth.UUID(char["uuid"]), char["flags"], [(bluetooth.UUID(char["descriptors"]["uuid"]), char["descriptors"]["flags"])]) for char in _chars])
+#_BLE_SERVICE = (bluetooth.UUID(Service_UUID), [(bluetooth.UUID(char["uuid"]), char["flags"]) for char in _chars])
 
 #, char["descriptors"]["description"]
 class BLEPeripheral:
