@@ -13,9 +13,11 @@ from threading import Thread
 NAME = "ECMOSensor"
 
 commander = ''
-notifier = ''
+notifier = []
 
 data_list = [[],[],[],[],[],[],[],[],[]]
+
+_DESC_UUID = "00002901-0000-1000-8000-00805f9b34fb"
 
 # Docu:
 # first scan for BLE advertisements
@@ -52,12 +54,12 @@ class BLE_module(QObject):
     async def loop_connect(self):
         while True:
             await self.ble_connection()
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
 
     async def ble_connection(self):
-        global NAME, device, msg, commander, notifier
+        global NAME, device, msg, commander, notifier, _DESC_UUID
         try:
-            device = await BleakScanner.find_device_by_name(NAME, timeout=5.0)
+            device = await BleakScanner.find_device_by_name(NAME, timeout=2.0)
         except Exception as e:
             self.notification_printer(e)
             return
@@ -72,7 +74,11 @@ class BLE_module(QObject):
             for service in services:
                 self.notification_printer(f"  {service}")
                 for char in service.characteristics:
-                    self.notification_printer(f"  Characteristic: {char.uuid}, Properties: {char.properties}, Handle: {char.handle}")
+                    self.notification_printer(f"  Characteristic: {char.uuid}, Properties: {char.properties}, Handle: {char.handle}, Description: {char.description}")
+                    for descriptor in char.descriptors:
+                        if descriptor == _DESC_UUID:
+                            value = await client.read_gatt_descriptor(descriptor.handle)
+                            self.notification_printer(f"Descriptor {descriptor.handle}: {value}")
                     if "read" in char.properties:
                         try:
                             value = await client.read_gatt_char(char)
@@ -82,18 +88,28 @@ class BLE_module(QObject):
                     if "write-without-response" in char.properties:
                         commander = char.uuid
                     if "notify" in char.properties:
-                        notifier = char
+                        notifier.append(char)
             
-            self.notification_printer(f'notifier: {notifier.handle}')
-            await client.start_notify(notifier.uuid, self.receive_notifications)
+            self.notification_printer(f'notifier: {notifier[1].handle}')
+            await client.start_notify(notifier[1].uuid, self.receive_data)
+            self.notification_printer("Listening for data...")
+
+            self.notification_printer(f'notifier: {notifier[0].handle}')
+            await client.start_notify(notifier[0].uuid, self.receive_notifications)
             self.notification_printer("Listening for notifications...")
             
+            #print the status
+
             # Keep connection alive with non-blocking sleep
             while self.client.is_connected:
                 await asyncio.sleep(0.01)  # Short sleep to yield control
 
+            self.notification_printer(f"Disconnected from {device.address}")
 
-    async def receive_notifications(self, x, data, throwaway=None):
+    async def receive_notifications(self, x, data):
+        self.notification_printer(data.decode().strip(), remote=True)
+
+    async def receive_data(self, x, data):
         global data_list
         try:
             raw = ast.literal_eval(data.decode().strip())
@@ -105,13 +121,18 @@ class BLE_module(QObject):
             self.data_received.emit(data_list)
         except Exception as e:
             self.notification_printer(e)
-    
+
     def send_message(self, msg):
         if self.client and self.loop:
             # Schedule write task in asyncio loop
             asyncio.run_coroutine_threadsafe(self.write_message(msg), self.loop)
         else:
             self.notification_printer("BLE not connected")
+
+    def clear_graph(self):
+        global data_list
+        data_list = [[],[],[],[],[],[],[],[],[]]
+        self.notification_printer("graph cleared")
 
     async def write_message(self, msg):
         """Write data to BLE characteristic."""

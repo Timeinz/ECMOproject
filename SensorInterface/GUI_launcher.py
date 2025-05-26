@@ -11,6 +11,7 @@ from datetime import datetime
 
 class DesignerMainWindow(QMainWindow, Ui_MplMainWindow):
     send_message = pyqtSignal(str)
+    clear_graph = pyqtSignal()
 
     def __init__(self, parent = None, external = None):
         super(DesignerMainWindow, self).__init__(parent)
@@ -18,6 +19,10 @@ class DesignerMainWindow(QMainWindow, Ui_MplMainWindow):
         self.start_button.clicked.connect(lambda: self.send_message.emit("mainstart"))
         self.stop_button.clicked.connect(lambda: self.send_message.emit("mainstop"))
         self.toggle_button.clicked.connect(lambda: self.send_message.emit("toggle"))
+        self.reboot_button.clicked.connect(lambda: self.send_message.emit("reboot"))
+        self.longtask_button.clicked.connect(lambda: self.send_message.emit("slowtask"))
+        
+        self.clear_button.clicked.connect(lambda: self.clear_graph.emit())
 
         self.x_time = []
         self.trim = 0
@@ -46,10 +51,10 @@ class DesignerMainWindow(QMainWindow, Ui_MplMainWindow):
         #self.mpl.canvas.ax.get_yaxis().grid(True)
         self.mpl.canvas.draw()
         self.box_data.append(str(list(data_list[i][-1] for i in range (9))))
-    
+
     def notification_printer(self, message, remote):
         if remote:
-            self.box_notification.append(f'<span style="color: red;">PICO: {message}</span>')
+            self.box_notification.append(f'<span style="color: red;">[PICO] {message}</span>')
         else:
             self.box_notification.append(message)
 

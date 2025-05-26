@@ -1,4 +1,5 @@
 from machine import Pin, Timer, reset
+from communication import Communication
 from peripherals import Peripherals
 from printhandler import PrintHandler
 from datawriter import DataWriter
@@ -6,6 +7,8 @@ import datetime_conversion as dtc
 import time
 import gc
 
+
+comm = Communication()
 p = Peripherals()
 ph = PrintHandler()
 dw = DataWriter()
@@ -43,10 +46,14 @@ def read_adc_callback():
             p.ADC.ditch1meas = False
         else:
             read = [dtc.to_human_int(p.RTC.read_datetime())]        # initate read. also take the time in ms, convert to human-readable int.
-            for i in range(0, p.ADC.num_of_chans):                  # convert ADC reading to temp using calibrattion coefficients
-                read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
+            read.extend(p.ADC.raw)
+            
+            #for i in range(p.ADC.num_of_chans):                  # convert ADC reading to temp using calibrattion coefficients
+                #read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
+                
             #dw.write_data(read)
-            ph.print(read)
+            #ph.print(read)
+            ph.send_data(read)
 
 def togglephrepl():
     ph.repl_set_enable(not ph.repl_is_enabled())
@@ -55,7 +62,7 @@ def togglephbt():
     ph.bt_set_enable(not ph.bt_is_enabled())
 
 def slowtask():
-    time.sleep_ms(3000)
+    time.sleep_ms(10)
 
 def indon():
     timer.init(period=100, mode=Timer.PERIODIC, callback=blink_callback)
@@ -85,6 +92,10 @@ def initadc():
 
 def reboot():
     reset()
+
+def status_log():
+    log = comm.get_log()
+    return log
 
 def gccollect():
     gc.collect()  # Call garbage collection

@@ -1,16 +1,18 @@
 import network, os
 from time import sleep
 import credentials
+from communication import Communication
 from printhandler import PrintHandler
 from peripherals import Peripherals
-from communication import Communication
 import config
+
 
 
 comm = Communication()  # Singleton instance
 #if comm.get_status().get("SPI") != "OK":
 #    raise RuntimeError("Critical SPI failure, halting")
 #print("Comms initialized")
+#ble = comm.ble
 
 ph  = PrintHandler()
 ph.repl_set_enable(True)

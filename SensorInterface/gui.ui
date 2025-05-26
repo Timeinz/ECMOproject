@@ -33,7 +33,7 @@
         </sizepolicy>
        </property>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -61,6 +61,27 @@
            <widget class="QPushButton" name="toggle_button">
             <property name="text">
              <string>Toggle</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clear_button">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="reboot_button">
+            <property name="text">
+             <string>Reboot</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="longtask_button">
+            <property name="text">
+             <string>Long</string>
             </property>
            </widget>
           </item>

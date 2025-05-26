@@ -45,4 +45,22 @@ class PrintHandler:
                 message = args_str + '\n'
                 
             if bt is not None:
-                bt.send(bt._designation_map["Send_data"]["handle"], message.encode('utf-8'))
+                print(bt._designation_map["notification"]["handle"])
+                bt.send(bt._designation_map["notification"]["handle"], message.encode('utf-8'))
+                
+    @classmethod
+    def send_data(cls, *args, **kwargs):
+        # Convert args to string
+        args_str = ' '.join(map(str, args))
+        
+        # Convert kwargs to string
+        if kwargs:
+            kwargs_str = ', '.join(f"{key}={value}" for key, value in kwargs.items())
+            # Combine args and kwargs
+            message = f"{args_str}: {kwargs_str}"
+        else:
+            message = args_str + '\n'
+            
+        if bt is not None:
+            print(bt._designation_map["send_data"]["handle"])
+            bt.send(bt._designation_map["send_data"]["handle"], message.encode('utf-8'))

@@ -1,5 +1,5 @@
 from machine import Pin, SPI, I2C
-import bluetooth
+import bluetooth, sys
 from ble_peripheral import BLEPeripheral
 import config
 
@@ -59,7 +59,7 @@ class Communication:
             self._status["BLE"] = "OK"
             self._log_text += "BLE OK\n"
         except Exception as e:
-            self._status["BLE"] = f"ERROR: {e}"
+            self._status["BLE"] = f"ERROR: {sys.print_exception(e)}"
             self._log_text += f"BLE failed: {e}\n"
 
     @property

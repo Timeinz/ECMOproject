@@ -76,6 +76,8 @@ while True:
         new_tasks.append(Task(tasks.read_adc_callback, priority=1))
     now = time.ticks_ms()
     
+    #if 
+
     try:
         # Create new_tasks list here, so it captures all tasks from interrupts
         current_tasks = new_tasks[:]  # Copy the current tasks to process
@@ -99,4 +101,4 @@ while True:
         #machine.idle()
     #machine.idle() doesn't seem to be working ...
     #gc.collect()
-    #time.sleep_ms(1)
+    time.sleep_us(10)

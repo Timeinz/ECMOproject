@@ -17,6 +17,8 @@ if __name__ == "__main__":
     ble.data_received.connect(gui.update_graph, type=Qt.ConnectionType.QueuedConnection)
     ble.notification_print.connect(gui.notification_printer)
     gui.send_message.connect(ble.send_message)
+    gui.clear_graph.connect(ble.clear_graph)
+
 
     gui.show()
     sys.exit(app.exec())

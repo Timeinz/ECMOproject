@@ -17,33 +17,45 @@ _FLAG_NOTIFY = const(0x0010)
 
 _chars = []
 for char in Char_UUID_map:
+    '''
     char_copy = char.copy()
     # Add flags based on designation
     if char_copy["designation"] == "Send_data":
+        char_copy["flags"] = _FLAG_NOTIFY
+    if char_copy["designation"] == "notification":
         char_copy["flags"] = _FLAG_NOTIFY
     elif char_copy["designation"].startswith("Receive_"):
         char_copy["flags"] = _FLAG_WRITE
     else:
         char_copy["flags"] = _FLAG_READ
-    _chars.append(char_copy)
+    '''
+    #_chars.append(char_copy)
+    _chars.append(char)
 
 
 # declaring the service.
-_BLE_SERVICE = (bluetooth.UUID(Service_UUID), [(bluetooth.UUID(char["uuid"]), char["flags"]) for char in _chars])
+_BLE_SERVICE = (bluetooth.UUID(Service_UUID), [(bluetooth.UUID(char["uuid"]), char["flags"], [(bluetooth.UUID(char["descriptors"]["uuid"]), char["descriptors"]["flags"])]) for char in _chars])
 
-
+#, char["descriptors"]["description"]
 class BLEPeripheral:
     def __init__(self, ble, name=NAME):
         self._ble = ble
         self._ble.active(True)
         self._ble.irq(self._irq)
         self._handles = self._ble.gatts_register_services((_BLE_SERVICE,))[0]  # Get handles for first service
+        print(self._handles)
         self._handle_map = {h: {"designation": c["designation"], "uuid": c["uuid"]} for h, c in zip(self._handles, _chars)}
         self._designation_map = {c["designation"]: {"handle": h, "uuid": c["uuid"]} for h, c in zip(self._handles, _chars)}
         self._uuid_map = {c["uuid"]: {"handle": h, "designation": c["designation"]} for h, c in zip(self._handles, _chars)}
+        i = 0
+        for char in _chars:
+            if i != 1 and i != 3:
+                self._ble.gatts_write(self._uuid_map[char["uuid"]]["handle"] + 1, self._uuid_map[char["uuid"]]["designation"])
+            i += 1
         self._connections = set()
         self._max_connections = 1  # Only one concurrent connection
         self._receive_callback = None
+        self._receive_list = [[], []] #[[conn_handle], [value_handle]]
         self._payload = advertising_payload(name=name)
         self._advertise()
     
