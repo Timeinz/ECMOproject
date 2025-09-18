@@ -69,6 +69,7 @@ class BLE_module(QObject):
         async with BleakClient(device) as client:
             self.client = client
             self.notification_printer(f"Connected to {device.address}")
+            self.notification_printer(f"MTU size: {client.mtu_size}")
             services = client.services
             self.notification_printer("Services:")
             for service in services:
@@ -82,7 +83,7 @@ class BLE_module(QObject):
                     if "read" in char.properties:
                         try:
                             value = await client.read_gatt_char(char)
-                            self.notification_printer(f"    Value: {value}")
+                            self.notification_printer(f"    Value: {value.decode().strip()}")
                         except Exception as e:
                             self.notification_printer(f"    Failed to read: {e}")
                     if "write-without-response" in char.properties:
@@ -113,7 +114,6 @@ class BLE_module(QObject):
 
     async def receive_data(self, x, data):
         global data_list
-        print("bla")
         try:
             raw = ast.literal_eval(data.decode().strip())
             trim = min( len(data_list[0]) - self.window_length, 0)

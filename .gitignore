@@ -7,3 +7,12 @@ PicoOld/.micropico
 PicoOld/.vscode/extensions.json
 PicoOld/.vscode/settings.json
 PicoW/psk.json
+Datasheets_Documents
+PICO_Firmware
+Sandbox
+.git
+build
+PicoOld
+PicoW
+SensorInterface
+.gitignore

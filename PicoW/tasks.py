@@ -46,10 +46,10 @@ def read_adc_callback():
             p.ADC.ditch1meas = False
         else:
             read = [dtc.to_human_int(p.RTC.read_datetime())]        # initate read. also take the time in ms, convert to human-readable int.
-            read.extend(p.ADC.raw)
+            #read.extend(p.ADC.raw)
             
-            #for i in range(p.ADC.num_of_chans):                  # convert ADC reading to temp using calibrattion coefficients
-                #read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
+            for i in range(p.ADC.num_of_chans):                  # convert ADC reading to temp using calibrattion coefficients
+                read.append(p.ADC.chan[i].convert(p.ADC.raw[i]))
                 
             #dw.write_data(read)
             #ph.print(read)

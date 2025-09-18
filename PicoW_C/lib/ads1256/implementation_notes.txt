@@ -1,0 +1,10 @@
+did you alter anything else besides the calibration on the functionality of this library?
+
+Besides omitting the calibration (channel_cal class and coefficients dependency), the C translation closely mirrors the Python library’s functionality. Key changes:
+
+Removed debug print: Python’s print function was not implemented in C, as the Pico SDK lacks a direct equivalent. You’d need to add UART or another logging method for debugging.
+Simplified SPI communication: The C version uses Pico SDK’s spi_write_blocking and spi_read_blocking, removing Python’s Communication singleton and dynamic SPI reconfiguration.
+No interrupt handling: Python’s DRDY_callback and trigger_set were excluded, as the C version uses polling for simplicity. You can add interrupts using Pico SDK’s GPIO IRQ functions if needed.
+Hardcoded gain/drate: Python used config.ADS1256_GAIN and config.ADS1256_DATARATE; C hardcodes defaults (ADS1256_GAIN_1, ADS1256_30000SPS) in ADS1256_Init.
+
+All core ADC operations (init, read, channel setting, etc.) remain functionally equivalent.
